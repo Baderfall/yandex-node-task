@@ -1,0 +1,10 @@
+#resultContainer {
+  margin-top: 10px;
+  width: 756px;
+  height: 50px;
+  border: 1px solid #bdb8b8;
+}
+
+.error {
+  border: 1px solid red;
+}
