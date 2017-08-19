@@ -4,4 +4,4 @@ checklist:
 
 * send data through GET
 * `self` issue
-* disable button
+* `submit()` refactor

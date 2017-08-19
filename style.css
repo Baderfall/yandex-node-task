@@ -1,4 +1,4 @@
-#resultContainer {
+div {
   margin-top: 10px;
   width: 756px;
   height: 50px;
@@ -7,4 +7,12 @@
 
 .error {
   border: 1px solid red;
+}
+
+.success {
+  border: 1px solid green;
+}
+
+.progress {
+  border: 1px solid yellow;
 }

@@ -1,5 +1,6 @@
 window.MyForm = {
   form: document.querySelector('#myForm'),
+  resultContainer: document.querySelector('#resultContainer'),
 
   validate() {
     const fields = this.getData();
@@ -40,7 +41,7 @@ window.MyForm = {
     }
 
     var sum = string.split('').reduce((result, symbol) => {
-      number = parseInt(symbol, 10);
+      const number = parseInt(symbol, 10);
       if (number) {
         return result + number;
       }
@@ -59,7 +60,7 @@ window.MyForm = {
       fio: this.form.elements.fio.value,
       email: this.form.elements.email.value,
       phone: this.form.elements.phone.value
-    }
+    };
   },
 
   setData(data) {
@@ -70,14 +71,19 @@ window.MyForm = {
 
   submit() {
     const self = this;
+    this._clearForm();
     const validation = this.validate();
-    this._markErrors(validation.errorFields);
     if (!validation.isValid) {
+      this._markErrors(validation.errorFields);
       return;
     }
+    this.form.submit.disabled = true;
     this._sendRequest()
       .then(function(json) {
         self._handleResponse(json);
+      })
+      .then(function() {
+        self.form.elements.submit.disabled = false;
       })
       .catch(console.error);
   },
@@ -88,10 +94,10 @@ window.MyForm = {
         this._handleSuccess();
         break;
       case 'error':
-        this._handleError();
+        this._handleError(res.reason);
         break;
       case 'progress':
-        this._handleProgress();
+        this._handleProgress(res.timeout);
         break;
       default:
         console.warn(`Unknown response status: "${res.status}"`);
@@ -99,15 +105,20 @@ window.MyForm = {
   },
 
   _handleSuccess() {
-    console.log('Success');
+    this.resultContainer.classList.add('success');
+    this.resultContainer.textContent = 'Success';
   },
 
-  _handleError() {
-    console.log('Error');
+  _handleError(reason) {
+    this.resultContainer.classList.add('error');
+    this.resultContainer.textContent = reason;
   },
 
-  _handleProgress() {
-    console.log('Proggress');
+  _handleProgress(timeout) {
+    this.resultContainer.classList.add('progress');
+    setTimeout(() => {
+      this.submit();
+    }, timeout);
   },
 
   _sendRequest() {
@@ -119,17 +130,21 @@ window.MyForm = {
       return promise;
   },
 
-  _markErrors(errorFieldNames) {
+  _clearForm() {
     const inputsArr = Array.from(this.form.elements);
     inputsArr.forEach((input) => {
       input.classList.remove('error');
     });
+    this.resultContainer.classList.remove('success', 'progress', 'error');
+    this.resultContainer.textContent = '';
+  },
 
+  _markErrors(errorFieldNames) {
     errorFieldNames.forEach((name) => {
       this.form.elements[name].classList.add('error');
     });
   }
-}
+};
 
 
 /*****TESTS******/
@@ -143,5 +158,3 @@ document.forms.myForm.addEventListener('submit', function(e) {
   e.preventDefault();
   MyForm.submit();
 });
-
-MyForm.submit();
