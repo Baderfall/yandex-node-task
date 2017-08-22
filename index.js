@@ -5,7 +5,7 @@ window.MyForm = {
   validate() {
     const fields = this.getData();
     const errorFields = [];
-    for (let name in fields) {
+    for (const name in fields) {
       const isValidField = this._validateField(name, fields[name]);
       if (!isValidField) {
         errorFields.push(name);
@@ -39,14 +39,15 @@ window.MyForm = {
     if (!phoneRegex.test(string)) {
       return false;
     }
-
-    var sum = string.split('').reduce((result, symbol) => {
-      const number = parseInt(symbol, 10);
+    let sum = 0;
+    let number;
+    for (const symbol of string) {
+      number = parseInt(symbol, 10);
       if (number) {
-        return result + number;
+        sum += number;
       }
-      return result;
-    }, 0);
+    }
+
     return sum <= 30;
   },
 
@@ -70,8 +71,7 @@ window.MyForm = {
   },
 
   submit() {
-    const self = this;
-    this._clearForm();
+    this._clearFormStyles();
     const validation = this.validate();
     if (!validation.isValid) {
       this._markErrors(validation.errorFields);
@@ -79,16 +79,14 @@ window.MyForm = {
     }
     this.form.submit.disabled = true;
     this._sendRequest()
-      .then(function(json) {
-        self._handleResponse(json);
-      })
-      .then(function() {
-        self.form.elements.submit.disabled = false;
+      .then((json) => {
+        this._handleResponse(json);
       })
       .catch(console.error);
   },
 
   _handleResponse(res) {
+    this.form.elements.submit.disabled = false;
     switch (res.status) {
       case 'success':
         this._handleSuccess();
@@ -122,15 +120,27 @@ window.MyForm = {
   },
 
   _sendRequest() {
+    const data = this._encodeData();
     const url = this.form.action;
-    const promise = fetch(url)
+    const promise = fetch(url + data)
       .then(function(res) {
         return res.json();
       });
       return promise;
   },
 
-  _clearForm() {
+  _encodeData() {
+    const encodedArr = [];
+    const data = this.getData();
+    for (const input in data) {
+      const encodedElem = `${input}=${encodeURIComponent(data[input])}`;
+      encodedArr.push(encodedElem);
+    }
+    const encodedStr = encodedArr.join('&');
+    return `?${encodedStr}`;
+  },
+
+  _clearFormStyles() {
     const inputsArr = Array.from(this.form.elements);
     inputsArr.forEach((input) => {
       input.classList.remove('error');
@@ -158,3 +168,5 @@ document.forms.myForm.addEventListener('submit', function(e) {
   e.preventDefault();
   MyForm.submit();
 });
+
+MyForm.submit();
