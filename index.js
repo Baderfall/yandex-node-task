@@ -76,7 +76,6 @@ window.MyForm = {
         sum += number;
       }
     }
-
     return sum <= 30;
   },
 
