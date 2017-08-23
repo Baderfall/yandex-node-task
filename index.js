@@ -2,6 +2,35 @@ window.MyForm = {
   form: document.querySelector('#myForm'),
   resultContainer: document.querySelector('#resultContainer'),
 
+  setData(data) {
+    this.form.elements.fio.value = data.fio || '';
+    this.form.elements.email.value = data.email || '';
+    this.form.elements.phone.value = data.phone || '';
+  },
+
+  getData() {
+    return {
+      fio: this.form.elements.fio.value,
+      email: this.form.elements.email.value,
+      phone: this.form.elements.phone.value
+    };
+  },
+
+  submit() {
+    this._clearFormStyles();
+    const validation = this.validate();
+    if (!validation.isValid) {
+      this._markErrors(validation.errorFields);
+      return;
+    }
+    this.form.submit.disabled = true;
+    this._sendRequest()
+      .then((json) => {
+        this._handleResponse(json);
+      })
+      .catch(console.error);
+  },
+
   validate() {
     const fields = this.getData();
     const errorFields = [];
@@ -54,35 +83,6 @@ window.MyForm = {
   _validateEmail(string) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@(ya.ru|yandex.(ru|ua|by|kz|com))$/;
     return emailRegex.test(string);
-  },
-
-  getData() {
-    return {
-      fio: this.form.elements.fio.value,
-      email: this.form.elements.email.value,
-      phone: this.form.elements.phone.value
-    };
-  },
-
-  setData(data) {
-    this.form.elements.fio.value = data.fio || '';
-    this.form.elements.email.value = data.email || '';
-    this.form.elements.phone.value = data.phone || '';
-  },
-
-  submit() {
-    this._clearFormStyles();
-    const validation = this.validate();
-    if (!validation.isValid) {
-      this._markErrors(validation.errorFields);
-      return;
-    }
-    this.form.submit.disabled = true;
-    this._sendRequest()
-      .then((json) => {
-        this._handleResponse(json);
-      })
-      .catch(console.error);
   },
 
   _handleResponse(res) {
@@ -156,17 +156,7 @@ window.MyForm = {
   }
 };
 
-
-/*****TESTS******/
-MyForm.setData({
-  fio:   'Yarmosh Алексей СергёЁвич',
-  email: 'delete-863@yandex.by',
-  phone: '+7(111)222-33-11'
-});
-
-document.forms.myForm.addEventListener('submit', function(e) {
+document.forms.myForm.addEventListener('submit', (e) => {
   e.preventDefault();
   MyForm.submit();
 });
-
-MyForm.submit();

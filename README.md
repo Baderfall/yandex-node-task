@@ -1,5 +1,3 @@
 ## yandex-node-task
 
-checklist:
-* `getData()` refactor
-* `setTimeout` removing
+Run in Mozilla or with CORS disabled in Chrome.
